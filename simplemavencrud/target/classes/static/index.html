@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Employee Form</title>
+<style>
+/* Style for the form container */
+form {
+	display: inline-block; /* Display the form as an inline-block element */
+	text-align: center;
+	margin-top: 10px;
+	padding: 10px;
+	border: 1px solid #ccc;
+	border-radius: 5px;
+	background-color: #f9f9f9;
+	width: fit-content; /* Adjust the width to fit its content */
+}
+
+label {
+	font-weight: bold;
+	margin-bottom: 5px;
+}
+
+/* Style for input fields */
+input[type="text"] {
+	width: 50%; /* Set the input fields to 100% width within the form */
+	padding: 8px;
+	margin-bottom: 10px;
+	border: 1px solid #ccc;
+	border-radius: 3px;
+	font-size: 14px;
+}
+</style>
+</head>
+<body>
+	<center>
+		<form onsubmit="return false">
+			<label>Employee No: </label><input type="text" id="no"><br>
+			<br> <label>Employee Dept: </label><input type="text" id="dep"><br>
+			<br> <label>Employee Name: </label><input type="text" id="name"><br>
+			<br> <label>Employee Job: </label><input type="text" id="job"><br>
+			<br> <label>Employee Salary: </label><input type="text" id="sal">
+			</br> </br>
+			<button onclick="getall()">Display All Emp</button>
+			<button onclick="addemp()">Add Employee</button>
+		</form></br> </br>
+
+
+		<table border=1 id="table">
+
+			<tbody id="body">
+			</tbody>
+		</table>
+
+		<script>
+			function getall() {
+				var yy = new XMLHttpRequest();
+				yy.open("GET", "/employees", true);
+				yy.onreadystatechange = function() {
+					if (yy.readyState === 4 && yy.status === 200) {
+						var xx = JSON.parse(yy.responseText)
+						var body = document.getElementById("body");
+						var tab = document.getElementById("table");
+						tab.innerHTML = "";
+						var rr = tab.insertRow();
+						var t1 = rr.insertCell().textContent = "empNo";
+						var t2 = rr.insertCell().textContent = "emp dept";
+						var t3 = rr.insertCell().textContent = "emp name";
+						var t4 = rr.insertCell().textContent = "job";
+						var t5 = rr.insertCell().textContent = "salary";
+						var t6 = rr.insertCell().textContent = "deete";
+						var t7 = rr.insertCell().textContent = "upadte";
+
+						for (var i = 0; i < xx.length; i++) {
+							var r = tab.insertRow();
+							var c1 = r.insertCell();
+							var c2 = r.insertCell();
+							var c3 = r.insertCell();
+							var c4 = r.insertCell();
+							var c5 = r.insertCell();
+							var c6 = r.insertCell();
+							var c7 = r.insertCell();
+							c1.textContent = xx[i].empNo;
+							c2.textContent = xx[i].deptNo;
+							c3.textContent = xx[i].name;
+							c4.textContent = xx[i].job;
+							c5.textContent = xx[i].salary;
+
+							var deleteButton = document.createElement("button");
+							deleteButton.textContent = "Delete";
+							deleteButton.onclick = function() {
+								deleteRow(this.parentElement.parentElement);
+							};
+
+							var updateButton = document.createElement("button");
+							updateButton.textContent = "Update";
+							updateButton.onclick = function() {
+								updateRow(this.parentElement.parentElement);
+							};
+
+							c6.appendChild(deleteButton);
+							c7.appendChild(updateButton);
+							clear();
+						}
+					}
+				}
+				yy.send();
+			}
+			function deleteRow(row) {
+				var table = row.parentNode.parentNode;
+				var rowIndex = row.rowIndex;
+				table.deleteRow(rowIndex);
+				alert("Employee deleted successfully.");
+			}
+			function clear() {
+				document.getElementById("no").value = "";
+				document.getElementById("dep").value = "";
+				document.getElementById("name").value = "";
+				document.getElementById("job").value = "";
+				document.getElementById("sal").value = "";
+			}
+			function updateRow(row) {
+				var table = row.parentNode.parentNode;
+				var rowIndex = row.rowIndex;
+				var cells = row.cells;
+				var empNoInput = document.createElement("input");
+				empNoInput.value = cells[0].textContent;
+
+				var deptNoInput = document.createElement("input");
+				deptNoInput.value = cells[1].textContent;
+
+				var empNameInput = document.createElement("input");
+				empNameInput.value = cells[2].textContent;
+
+				var empJobInput = document.createElement("input");
+				empJobInput.value = cells[3].textContent;
+
+				var empSalaryInput = document.createElement("input");
+				empSalaryInput.value = cells[4].textContent;
+
+				cells[0].textContent = "";
+				cells[1].textContent = "";
+				cells[2].textContent = "";
+				cells[3].textContent = "";
+				cells[4].textContent = "";
+
+				cells[0].appendChild(empNoInput);
+				cells[1].appendChild(deptNoInput);
+				cells[2].appendChild(empNameInput);
+				cells[3].appendChild(empJobInput);
+				cells[4].appendChild(empSalaryInput);
+				var saveButton = document.createElement("button");
+				saveButton.textContent = "Save";
+				saveButton.onclick = function() {
+					var updatedEmpNo = empNoInput.value;
+					var updatedDeptNo = deptNoInput.value;
+					var updatedEmpName = empNameInput.value;
+					var updatedEmpJob = empJobInput.value;
+					var updatedEmpSalary = empSalaryInput.value;
+
+					cells[0].textContent = updatedEmpNo;
+					cells[1].textContent = updatedDeptNo;
+					cells[2].textContent = updatedEmpName;
+					cells[3].textContent = updatedEmpJob;
+					cells[4].textContent = updatedEmpSalary;
+
+					alert("Employee updated successfully.");
+					cells[5].removeChild(saveButton);
+				};
+
+				cells[5].appendChild(saveButton);
+			}
+
+			function addemp() {
+				var r1 = document.getElementById("no").value;
+				var r2 = document.getElementById("dep").value;
+				var r3 = document.getElementById("name").value;
+				var r4 = document.getElementById("job").value;
+				var r5 = document.getElementById("sal").value;
+				var data = {
+					empNo : encodeURIComponent(r1),
+					deptNo : encodeURIComponent(r2),
+					name : encodeURIComponent(r3),
+					job : encodeURIComponent(r4),
+					salary : encodeURIComponent(r5),
+				};
+				console.log(r1);
+				var xx = new XMLHttpRequest();
+				xx.open("POST", "/employees", true);
+				xx.setRequestHeader("Content-Type", "application/json");
+				xx.onreadystatechange = function() {
+					if (xx.readyState === 4 && xx.status === 200) {
+						alert("emp added sucessfully");
+					} else {
+						alert("not added");
+					}
+				}
+				var jsonData = JSON.stringify(data);
+				xx.send(jsonData);
+			}
+		</script>
+</body>
+</center>
+</html>
